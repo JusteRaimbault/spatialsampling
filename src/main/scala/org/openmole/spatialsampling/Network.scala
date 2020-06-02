@@ -8,6 +8,8 @@ import scala.util.Random
 case class Network(
                     nodes: Set[Network.Node],
                     links: Set[Network.Link],
+                    outLinkMap: Map[Network.Node,Vector[Network.Link]],
+                    inLinkMap: Map[Network.Node,Vector[Network.Link]],
                     directed: Boolean = false,
                     cachedShortestPaths: Option[Map[(Network.Node,Network.Node),(Seq[Network.Node],Seq[Network.Link],Double)]] = None
                   ){
@@ -19,6 +21,8 @@ case class Network(
     val newLinksSet = newlinks.toSet
     this.copy(links = newLinksSet)
   }
+
+  def outgoingLinksOf(n: Network.Node): Vector[Network.Link] = outLinkMap(n)
 }
 
 
@@ -36,7 +40,9 @@ object Network {
     def apply(id: Int,x: Double,y: Double): Node = Node(id,(x,y))
   }
 
-  case class Link(e1: Node,e2: Node,weight: Double,length: Double)
+  case class Link(e1: Node,e2: Node,weight: Double,length: Double) {
+    def oppositeOf(n: Node): Node = if(n==e1) e2 else if (n==e2) e1 else null
+  }
 
   object Link {
     def apply(e1: Node,e2: Node,weight: Double): Link = {
@@ -44,6 +50,12 @@ object Network {
       if (e1<=e2) Link(e1,e2,weight,d) else Link(e2,e1,weight,d)
     }
     def apply(e1: Node, e2: Node):Link = apply(e1,e2,1.0)
+  }
+
+  def apply(nodes: Set[Network.Node], links: Set[Network.Link]): Network = {
+    val out = links.map(l => (l.e1,l)).groupBy(_._1).map(e => (e._1,e._2.toVector.map(_._2)))
+    val in = links.map(l => (l.e2,l)).groupBy(_._1).map(e => (e._1,e._2.toVector.map(_._2)))
+    Network(nodes, links, out, in)
   }
 
   def networkToGrid(network: Network,footPrintResolution: Double = 1.0,linkwidth: Double = 1.0): RasterLayerData[Double] = {
@@ -139,5 +151,13 @@ object Network {
     val largestComp = components.sortWith { case (n1, n2) => n1.nodes.size > n2.nodes.size }.head
     largestComp
   }
+
+
+  def shortestPaths(network: Network,
+                    from: Seq[Node],
+                    to: Seq[Node]
+                   ): ShortestPaths = new Math.GraphAlgorithms.DijkstraShortestPaths(network, from, to).getPaths
+
+
 
 }

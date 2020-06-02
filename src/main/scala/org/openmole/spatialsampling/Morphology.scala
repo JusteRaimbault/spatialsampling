@@ -12,7 +12,7 @@ case class Morphology(
                            slope: (Double,Double),
                            density: Double,
                            components: Double,
-                           //avgDetour: Double, // requires shortest paths
+                           avgDetour: Double,
                            avgBlockArea: Double,
                            avgComponentArea: Double,
                            fullDilationSteps: Double,
@@ -28,10 +28,11 @@ object Morphology {
       grid.flatten.sum,
       moranDirect(grid),
       distanceMeanDirect(grid),
-      0.0,(0.0,0.0),
+      Math.entropy(grid.flatten),
+      Math.slope(grid.flatten),
       density(grid),
       components(grid,Some(cachedNetwork)),
-      //avgDetour(grid,Some(cachedNetwork)),
+      avgDetour(grid,Some(cachedNetwork)),
       avgBlockArea(grid,Some(cachedNetwork)),
       avgComponentArea(grid),
       fullDilationSteps(grid),
@@ -182,5 +183,24 @@ object Morphology {
     }
     steps
   }
+
+  def avgDetour(world: Array[Array[Double]],
+                cachedNetwork: Option[Network] = None,
+                sampledPoints: Int=50
+               )(implicit rng: Random): Double = {
+    if(world.flatten.sum==world.map{_.length}.sum) return 0.0
+    val nw = cachedNetwork match {case None => Network.gridToNetwork(world);case n => n.get}
+    val sampled = Math.sampleWithoutReplacement(nw.nodes.toSeq,sampledPoints)(rng)
+    val paths = Network.shortestPaths(nw, sampled, sampled)
+    val avgdetour = paths.toSeq.filter{!_._2._3.isInfinite}.map{
+      case (_,(nodes,_,d))=>
+        val (n1,n2) = (nodes.head,nodes.last)
+        val de = math.sqrt((n1.x-n2.x)*(n1.x-n2.x)+(n1.y-n2.y)*(n1.y-n2.y))
+        d/de
+    }.filter{!_.isNaN}.filter{!_.isInfinite}.sum / paths.size
+    avgdetour
+  }
+
+
 
 }

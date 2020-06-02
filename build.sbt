@@ -5,6 +5,8 @@ scalaVersion := "2.12.10"
 
 organization := "org.openmole.library"
 
+libraryDependencies += "org.apache.commons" % "commons-math3" % "3.6.1"
+
 useGpg := true
 publishMavenStyle in ThisBuild := true
 publishTo in ThisBuild := {

@@ -7,5 +7,6 @@ package object spatialsampling {
   type RasterDim = Either[Int,(Int,Int)]
   type Point = (Double,Double)
   type SpatialField[N] = Map[Point,Array[N]]
+  type ShortestPaths = Map[(Network.Node,Network.Node), (Seq[Network.Node],Seq[Network.Link],Double)]
 
 }
