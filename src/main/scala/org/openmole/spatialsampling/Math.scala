@@ -123,12 +123,11 @@ object Math {
 
   def sampleWithoutReplacementBy[T](sampled: Iterable[T], probability: T => Double, samples: Int)(implicit rng: Random): Vector[T] = {
     assert(samples <= sampled.size,"Can not sample more than vector size : "+samples+" / "+sampled.size)
-    Iterator.iterate((sampled, Vector.empty[T])) { case (rest, res) => {
+    Iterator.iterate((sampled, Vector.empty[T])) { case (rest, res) =>
       val totproba = rest.map(probability(_)).sum
       val normalizedProba = rest.toSeq.map(probability(_) / totproba)
       val sample = sampleOneBy[((T, Int), Double)](rest.toSeq.zipWithIndex.zip(normalizedProba), _._2)
       (rest.toSeq.zipWithIndex.filter(_._2 != sample._1._2).map(_._1), Vector(sample._1._1) ++ res)
-    }
     }.take(samples).toSeq.last._2
   }
 
@@ -225,12 +224,12 @@ object Math {
 
       def findMin: PairingNode = root
 
-      def clear: Unit= {
+      def clear(): Unit= {
         root = null
         size = 0
       }
 
-      def deleteMin: PairingNode = {
+      def deleteMin(): PairingNode = {
         if (size == 0) throw new NoSuchElementException()
         val oldRoot: PairingNode = root
         root = combine(cutChildren(root))
@@ -295,14 +294,14 @@ object Math {
         val vNode: PairingNode = heap.findMin
         val vDistance: Double = vNode.key
         if (radius < vDistance) {
-          heap.clear
+          heap.clear()
           return false
         }
         true
       }
       override def next(): Network.Node = {
         if (!hasNext) throw new NoSuchElementException()
-        val vNode: PairingNode = heap.deleteMin
+        val vNode: PairingNode = heap.deleteMin()
         val v: Network.Node = vNode.value._1
         val vDistance: Double = vNode.key
         for (e <- graph.outgoingLinksOf(v)) {
