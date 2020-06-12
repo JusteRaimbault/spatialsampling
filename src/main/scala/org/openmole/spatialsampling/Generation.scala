@@ -1,5 +1,6 @@
 package org.openmole.spatialsampling
 
+
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
@@ -156,6 +157,21 @@ object Generation {
 
     }
     arrayVals
+  }
+
+
+  def osmBuildingsGrid(lon: Double, lat: Double, windowSize: Double, worldWidth: Int): RasterLayerData[Double] = {
+    val (west,south,east,north) = GIS.wgs84window(lon, lat, windowSize)
+    val polygons = OSM.Buildings.getBuildings(south, west, north, east)
+    val (x0, y0) = GIS.WGS84ToPseudoMercator(lon, lat)
+    val (xmi, xma, ymi, yma) = (x0 - windowSize/2, x0 + windowSize/2, y0 - windowSize / 2, y0 + windowSize/2)
+    val step = (windowSize  - 1) / worldWidth
+    (for {
+      x <- BigDecimal(xmi) to BigDecimal(xma) by step
+      y <- BigDecimal(ymi) to BigDecimal(yma) by step
+    } yield Geometry.Point(x.toDouble,y.toDouble)).map{p=>
+      if (polygons.exists(p.inPolygon)) 1.0 else 0.0
+    }.toArray.grouped(worldWidth).toArray
   }
 
 
