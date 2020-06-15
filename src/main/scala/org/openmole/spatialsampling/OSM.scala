@@ -51,7 +51,7 @@ object OSM {
   object Buildings {
 
     def asPolygonSeq(e: OSMRoot.Enumerator[OSMObject.Way]): Seq[Polygon] = {
-      var result = scala.collection.mutable.Buffer[Polygon]()
+      /*var result = scala.collection.mutable.Buffer[Polygon]()
       var way: OSMObject.Way = e.next
       while (way != null) {
         val building = way.getTag("building")
@@ -62,7 +62,9 @@ object OSM {
           }
         }
         way = e.next
-      }
+      }*/
+      val result = Iterator.continually(Polygon(e.next)).takeWhile(_!=null).toSeq
+      println("polygons: "+result.size)
       result
     }
 

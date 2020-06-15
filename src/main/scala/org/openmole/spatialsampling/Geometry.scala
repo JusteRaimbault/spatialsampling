@@ -18,10 +18,11 @@ object Geometry {
 
     /**
       * polygon from OSM way (rq: no projection)
-      * @param way
+      * @param way way
       * @return
       */
     def apply(way: OSMObject.Way): Polygon = {
+      if (way==null) return null
       Polygon(
         way.nodes.map(n => Point(n.getX,n.getY)).toArray
       )
