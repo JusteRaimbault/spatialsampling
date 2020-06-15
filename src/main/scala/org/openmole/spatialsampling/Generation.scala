@@ -162,9 +162,12 @@ object Generation {
 
   def osmBuildingsGrid(lon: Double, lat: Double, windowSize: Double, worldWidth: Int): RasterLayerData[Double] = {
     val (west,south,east,north) = GIS.wgs84window(lon, lat, windowSize)
-    val polygons = OSM.Buildings.getBuildings(south, west, north, east)
+    val polygons = OSM.Buildings.getBuildings(west, south, east, north).map(_.project(GIS.WGS84ToPseudoMercator))
+    println(polygons.map(_.vertices.map(_.x).min))
+    println(polygons.map(_.vertices.map(_.y).min))
     val (x0, y0) = GIS.WGS84ToPseudoMercator(lon, lat)
     val (xmi, xma, ymi, yma) = (x0 - windowSize/2, x0 + windowSize/2, y0 - windowSize / 2, y0 + windowSize/2)
+    println(xmi+" - "+ymi)
     val step = (windowSize  - 1) / worldWidth
     (for {
       x <- BigDecimal(xmi) to BigDecimal(xma) by step

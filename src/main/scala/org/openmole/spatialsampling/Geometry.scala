@@ -12,6 +12,8 @@ object Geometry {
                     vertices: Array[Point]
                     ) {
 
+    def project(projection: (Double,Double) => (Double,Double)): Polygon = this.copy(vertices.map(_.project(projection)))
+
   }
 
   object Polygon {
@@ -44,6 +46,11 @@ object Geometry {
           else if (pi.y>pj.y&&pi.y>y&&pj.y<=y&&((y - pi.y)/(pj.y - pi.y)*(pj.x - pi.x)+pi.x - x)>0) -1
           else 0
       }.sum==0)
+    }
+
+    def project(projection: (Double,Double) => (Double,Double)): Point = {
+      val proj = projection(x,y)
+      Point(proj._1, proj._2)
     }
 
   }

@@ -50,26 +50,14 @@ object OSM {
 
   object Buildings {
 
-    def asPolygonSeq(e: OSMRoot.Enumerator[OSMObject.Way]): Seq[Polygon] = {
-      /*var result = scala.collection.mutable.Buffer[Polygon]()
-      var way: OSMObject.Way = e.next
-      while (way != null) {
-        val building = way.getTag("building")
-        if (building != null /* && building.equals("yes")*/ ) {
-          val potentialPolygon = Try(Polygon(way))
-          if (potentialPolygon.isSuccess) {
-            result += potentialPolygon.get
-          }
-        }
-        way = e.next
-      }*/
-      val result = Iterator.continually(Polygon(e.next)).takeWhile(_!=null).toSeq
-      println("polygons: "+result.size)
-      result
+    def toPolygonSeq(ways: Seq[OSMObject.Way]): Seq[Polygon] = {
+      def toPolygon(way: OSMObject.Way): Option[Polygon] =
+        if (way.getTag("building") != null) Try(Polygon(way)).toOption else None
+      ways.flatMap(toPolygon)
     }
 
     def getBuildings(west: Double, south: Double, east: Double, north: Double): Seq[Polygon] =
-      asPolygonSeq(get(west, south, east, north).enumerateWays)
+      toPolygonSeq(get(west, south, east, north).enumerateWays)
 
   }
 
@@ -107,11 +95,7 @@ object OSM {
       override def next: OSMObject.Node = if (iterator.hasNext) iterator.next._2 else null
     }
 
-    def enumerateWays: OSMRoot.Enumerator[OSMObject.Way] =
-      new OSMRoot.Enumerator[OSMObject.Way]() {
-        val iterator: Iterator[(Long,OSMObject.Way)] = getWays.iterator
-        override def next: OSMObject.Way = if (iterator.hasNext) iterator.next._2 else null
-      }
+    def enumerateWays: Seq[OSMObject.Way] = ways.values.toSeq
 
     def enumerateRelations: OSMRoot.Enumerator[OSMObject.Relation] = new OSMRoot.Enumerator[OSMObject.Relation]() {
       val iterator: Iterator[(Long,OSMObject.Relation)] = getRelations.iterator
@@ -120,7 +104,7 @@ object OSM {
 
     def getNode(identity: Long): OSMObject.Node = getNodes.getOrElse(identity,null)
 
-    def getWay(identity: Long): OSMObject.Way = getWays.getOrElse(identity,null)
+    def getWay(identity: Long): OSMObject.Way = ways.getOrElse(identity,null)
 
     def getRelation(identity: Long): OSMObject.Relation = getRelations.getOrElse(identity,null)
 
@@ -197,7 +181,7 @@ object OSM {
       }
 
       override def visit(way: OSMObject.Way): Null = {
-        getWays.put(way.getId, way)
+        ways.put(way.getId, way)
         null
       }
 
@@ -219,7 +203,7 @@ object OSM {
       this.nodes = nodes
     }
 
-    def getWays: mutable.Map[Long, OSMObject.Way] = ways
+    //def getWays: mutable.Map[Long, OSMObject.Way] = ways
 
     def setWays(ways: mutable.Map[Long, OSMObject.Way]): Unit = {
       this.ways = ways
@@ -242,7 +226,7 @@ object OSM {
 
     def gatherAllOsmObjects: mutable.HashSet[OSMObject] = {
       val objects = new mutable.HashSet[OSMObject]
-      getWays.values.foreach(objects.add(_))
+      ways.values.foreach(objects.add(_))
       getRelations.values.foreach(objects.add(_))
       getNodes.values.foreach(objects.add(_))
       objects
