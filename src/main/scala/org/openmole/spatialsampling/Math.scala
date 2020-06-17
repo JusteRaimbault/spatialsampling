@@ -359,7 +359,7 @@ object Math {
               p = map.getOrElse(cur, null)
             }
           }
-          paths.put((source, target), (nodeList.reverse,edgeList.reverse,weight))
+          paths.put((source, target), (nodeList.reverse.toSeq,edgeList.reverse.toSeq,weight))
         }
         paths.toMap
       }

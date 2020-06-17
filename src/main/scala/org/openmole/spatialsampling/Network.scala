@@ -143,7 +143,7 @@ object Network {
       val currentcomponent = traversenode(entry)
       res.append(Network(currentcomponent._1.toSet, currentcomponent._2.toSet))
     }
-    res
+    res.toSeq
   }
 
   def largestConnectedComponent(network: Network): Network = {
