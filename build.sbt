@@ -13,7 +13,7 @@ publishTo in ThisBuild := sonatypePublishToBundle.value
 
 lazy val overwriteNonSnapshot = true // use to overwrite when publish non-snapshot if issue during a previous release tentative
 publishConfiguration := publishConfiguration.value.withOverwrite(overwriteNonSnapshot)
-credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
+
 licenses in ThisBuild := Seq("Affero GPLv3" -> url("http://www.gnu.org/licenses/"))
 homepage in ThisBuild := Some(url("https://github.com/openmole/spatialsampling"))
 scmInfo in ThisBuild := Some(ScmInfo(url("https://github.com/openmole/spatialsampling.git"), "scm:git:git@github.com:openmole/spatialsampling.git"))
