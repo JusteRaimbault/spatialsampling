@@ -3,7 +3,8 @@ scalaVersion in ThisBuild := "2.13.2"
 crossScalaVersions in ThisBuild := Seq("2.12.11", "2.13.2")
 
 
-organization := "org.openmole.library"
+organization := "org.openmole"
+name := "spatialsampling"
 
 libraryDependencies += "org.apache.commons" % "commons-math3" % "3.6.1"
 
