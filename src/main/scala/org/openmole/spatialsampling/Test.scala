@@ -11,7 +11,7 @@ object Test extends App {
 
     def testOSM(): Unit = {
       println(gridToString(
-        Generation.osmBuildingsGrid( -0.1329176, 51.5248763, 500, 200)
+        Generation.osmBuildingsGrid( -0.1329176, 51.5248763, 500, 100)
       ))
     }
 
